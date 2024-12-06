@@ -40,7 +40,7 @@ __global__ void gemmSharedMem (int M, int N, int K,
         // Execute dot product of blocked matrix
         for (int k = 0; k < BLOCK_SIZE; k++) {
             temp += As[threadRow * BLOCK_SIZE + k] \
-            + Bs[k * BLOCK_SIZE + threadCol];
+            * Bs[k * BLOCK_SIZE + threadCol];
         }
 
         __syncthreads();

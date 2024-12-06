@@ -8,8 +8,8 @@ C = M x N
 */
 __global__ void gemmNaive(int M, int N, int K, 
                         float alpha,
-                        const float *A,
-                        const float *B,
+                        float *A,
+                        float *B,
                         float beta,
                         float *C) {
 
