@@ -30,23 +30,6 @@ void randomInit(float *data, int size) {
         data[i] = 1.0;
 }
 
-// void cpuGemm(int M, int N, int K,
-//             const float alpha,
-//             const float* A,
-//             const float* B, 
-//             const float beta,
-//             float* C) {
-//    for(int i = 0; i < M; i++) {
-//        for(int j = 0; j < N; j++) {
-//            float temp = 0.0f;
-//            for(int k = 0; k < K; k++) {
-//                temp += A[i * K + k] * B[k * N + j];
-//            }
-//            C[i * N + j] = alpha * temp + beta * C[i * N + j];
-//        }
-//    }
-// }
-
 // Verification
 bool verifyResults(float* gpu_cu, float* gpu, int size, float tolerance=1e-5) {
    for(int i = 0; i < size; i++) {

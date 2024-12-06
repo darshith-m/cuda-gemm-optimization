@@ -39,7 +39,7 @@ __global__ void gemmVec2dBlockTiling (int M, int N, int K,
     float regA[TM] = {0.0};
     float regB[TN] = {0.0};
 
-    for (int blkIdx = 0; blkIdx < K; blkIdx += BK) {
+    for (uint blkIdx = 0; blkIdx < K; blkIdx += BK) {
         
         float4 temp = \
         reinterpret_cast<float4 *> (&A[threadRowA * K + threadColA * 4])[0];
@@ -60,43 +60,37 @@ __global__ void gemmVec2dBlockTiling (int M, int N, int K,
 
         // Perform per-thread operation
         for (uint dotIdx = 0; dotIdx < BK; dotIdx++) {
-            
-            // Perform per-thread operation
-            for (uint dotIdx = 0; dotIdx < BK; dotIdx++) {
-                
-                // Load shared memory block into local registers
-                for (uint i = 0; i < TM; i++) {
-                    regA[i] = As[dotIdx * BM + threadRow * TM + i];
-                }
-                for (uint i = 0; i < TN; i++) {
-                    regB[i] = Bs[dotIdx * BN + threadCol * TN + i];
-                }
+            // Load shared memory block into local registers
+            for (uint i = 0; i < TM; i++) {
+                regA[i] = As[dotIdx * BM + threadRow * TM + i];
+            }
+            for (uint i = 0; i < TN; i++) {
+                regB[i] = Bs[dotIdx * BN + threadCol * TN + i];
+            }
 
-                for (uint resIdxA = 0; resIdxA < TM; resIdxA++) {
-                    for (uint resIdxB = 0; resIdxB < TN; resIdxB++) {
-                        threadResult[resIdxA * TN + resIdxB] \
-                        += regA[resIdxA] * regB[resIdxB];
-                    }
+            for (uint resIdxA = 0; resIdxA < TM; resIdxA++) {
+                for (uint resIdxB = 0; resIdxB < TN; resIdxB++) {
+                    threadResult[resIdxA * TN + resIdxB] \
+                    += regA[resIdxA] * regB[resIdxB];
                 }
-                __syncthreads();
             }
         }
-        
-        for (uint resIdxA = 0; resIdxA < TM; resIdxA++) {
-            for (uint resIdxB = 0; resIdxB < TN; resIdxB++) {
-                
-                float4 temp = reinterpret_cast<float4 *>\
-                (&C[(threadRow * TM + resIdxA) * N + threadCol * TN + resIdxB])[0];
-                
-                temp.x = alpha * threadResult[resIdxA * TN + resIdxB] + beta * temp.x; 
-                temp.y = alpha * threadResult[resIdxA * TN + resIdxB + 1] + beta * temp.y; 
-                temp.z = alpha * threadResult[resIdxA * TN + resIdxB + 2] + beta * temp.z; 
-                temp.w = alpha * threadResult[resIdxA * TN + resIdxB + 3] + beta * temp.w; 
-                
-                reinterpret_cast<float4 *>( \
-                    &C[(threadRow * TM + resIdxA) * N + threadCol * TN + resIdxB])[0] = temp;
-            }
-        }
+        __syncthreads();
     }
 
+    for (uint resIdxA = 0; resIdxA < TM; resIdxA++) {
+        for (uint resIdxB = 0; resIdxB < TN; resIdxB+=4) {
+            
+            float4 temp = reinterpret_cast<float4 *>\
+            (&C[(threadRow * TM + resIdxA) * N + threadCol * TN + resIdxB])[0];
+            
+            temp.x = alpha * threadResult[resIdxA * TN + resIdxB] + beta * temp.x; 
+            temp.y = alpha * threadResult[resIdxA * TN + resIdxB + 1] + beta * temp.y; 
+            temp.z = alpha * threadResult[resIdxA * TN + resIdxB + 2] + beta * temp.z; 
+            temp.w = alpha * threadResult[resIdxA * TN + resIdxB + 3] + beta * temp.w; 
+            
+            reinterpret_cast<float4 *>( \
+                &C[(threadRow * TM + resIdxA) * N + threadCol * TN + resIdxB])[0] = temp;
+        }
+    }
 }
