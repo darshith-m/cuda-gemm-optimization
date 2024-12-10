@@ -46,16 +46,6 @@ Vectorization:
 
 These optimizations combined give significant speedups in GEMM operations, compared to naive implementations.
 
-## Project Directory
-
-.
-├── .vscode/          # VS Code configuration
-├── images/           # Documentation images and diagrams
-├── profiles/         # Performance profiling data (Nsight Compute reports)
-├── src/              # Source code files
-├── gemm_optimization.ipynb   # Jupyter notebook with optimization steps
-└── README.md         # Project introduction
-
 # CUDA GEMM Optimization Project
 
 A CUDA-based matrix multiplication implementation showcasing progressive optimization techniques.
